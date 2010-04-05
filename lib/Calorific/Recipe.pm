@@ -45,12 +45,12 @@ sub value
         if (defined $recipe_xref->{$label}) {
             return $recipe_xref->{$label}->value($self->count(), $recipe_xref);
         } else {
-            return {$label => $self->count};
+            return {$label => $count * $self->count};
         }
     } else {
         my $value_by_label = {};
         for my $comp ( @{ $self->components() } ) {
-            $value_by_label = add_hashes($value_by_label, $comp->value($comp->count, $recipe_xref));
+            $value_by_label = add_hashes($value_by_label, $comp->value($count, $recipe_xref));
         }
         return $value_by_label;
     }

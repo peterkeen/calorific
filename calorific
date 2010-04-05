@@ -32,18 +32,19 @@ my $things = Load($contents);
 my %recipes;
 my @entries;
 
-for my $key ( keys %$things ) {
+for my $thing ( @$things ) {
+    my ($key) = keys %$thing;
     if (key_is_recipe($key)) {
         my ($count, $label) = split(/\s+/, $key, 2);
-        $recipes{$label} = Calorific::Recipe->parse($key, $things->{$key});
+        $recipes{$label} = Calorific::Recipe->parse($key, $thing->{$key});
     } elsif (key_is_entry($key)) {
-        push @entries, Calorific::Entry->parse($key, $things->{$key});
+        push @entries, Calorific::Entry->parse($key, $thing->{$key});
     } else {
         die "I have no idea what to do with '$key'";
     }
 }
 
-for my $entry ( sort { $a->date cmp $b->date || $a->description cmp $b->description } @entries )
+for my $entry ( @entries )
 {
     my $value = $entry->value(\%recipes);
     my @keys = sort keys %$value;
