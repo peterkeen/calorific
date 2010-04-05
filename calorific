@@ -1,0 +1,70 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use File::Basename qw/ dirname /;
+use File::Slurp qw/ read_file /;
+use Getopt::Long;
+use YAML::XS;
+use Perl6::Form;
+
+BEGIN { unshift @INC, dirname(__FILE__) . "/lib"; }
+$SIG{__DIE__} = sub { use Carp; confess @_; };
+
+use Calorific::Recipe;
+use Calorific::Entry;
+
+GetOptions(
+    'f|file=s' => \(my $file)
+);
+
+$file ||= $ENV{CALORIFIC_FILE};
+
+unless($file) {
+    print STDERR "No file given. Specify one using -f or the CALORIFIC_FILE environment variable.\n";
+    exit 1;
+}
+
+my $contents = read_file($file);
+
+my $things = Load($contents);
+
+my %recipes;
+my @entries;
+
+for my $key ( keys %$things ) {
+    if (key_is_recipe($key)) {
+        my ($count, $label) = split(/\s+/, $key, 2);
+        $recipes{$label} = Calorific::Recipe->parse($key, $things->{$key});
+    } elsif (key_is_entry($key)) {
+        push @entries, Calorific::Entry->parse($key, $things->{$key});
+    } else {
+        die "I have no idea what to do with '$key'";
+    }
+}
+
+for my $entry ( sort { $a->date cmp $b->date || $a->description cmp $b->description } @entries )
+{
+    my $value = $entry->value(\%recipes);
+    my @keys = sort keys %$value;
+    my $first = shift @keys;
+    print form "{<<<<<<<<<<}{<<<<<<<<<<<<<<<<<<<<}{>>>>>>>>>>}\n",
+               $entry->date(), $entry->description(), $value->{$first} . " $first";
+    for my $key (@keys) {
+        print ' ' x 30 . "{>>>>>>>>>>}\n", $value->{$key} . " $key";
+    }
+}
+
+sub key_is_recipe
+{
+    my $key = shift;
+    return $key =~ /^[\d\.]+\s+/;
+}
+
+sub key_is_entry
+{
+    my $key = shift;
+    return $key =~ /^\d{4}-\d{2}-\d{2}\s+/;
+}
+
+
