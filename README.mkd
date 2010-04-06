@@ -1,0 +1,48 @@
+Calorific
+=========
+
+This is a command-line nutrient tracking tool. It allows you
+to track calories, protein, or whatever nutrients you want to
+track by creating "recipes" and dated entries that use those
+recipes. Calorific's input format is a standard YAML file.
+
+Here's a sample Calorific input file:
+
+  - 1 egg:                                     [  90 kcal,  8 prot ]
+  - 1 slice Dave's Killer Bread (whole wheat): [ 100 kcal,  5 prot ]
+  - 2 tbsp crunchy peanut butter:              [ 210 kcal,  7 prot ]
+  - 1 cup whole milk:                          [ 120 kcal,  8 prot ]
+  - 2 scoop Trader Joe's protein shake mix:    [ 130 kcal, 16 prot ]
+  
+  - 1 Trader Joe's protein shake:
+      - 1.5 cup whole milk
+      - 2 scoop Trader Joe's protein shake mix
+  
+  - 1 workout breakfast:
+      - 2 egg
+      - 2 tbsp crunchy peanut butter
+      - 2 slice Dave's Killer Bread (whole wheat)
+      - 1 Trader Joe's protein shake
+  
+  - 2010-03-31 breakfast:
+      - 1 workout breakfast
+  
+  - 2010-04-06 breakfast:
+      - 2 slice Dave's Killer Bread (whole wheat)
+      - 2 tbsp crunchy peanut butter
+
+And here's the default output for it:
+
+  $ calorific -f sample.yaml
+  2010-03-31 <total>                  900 kcal
+                                       61 prot
+  2010-04-06 <total>                  410 kcal
+                                       17 prot
+
+Entries are really just dated recipes, so anything can go in them.
+This is perfectly valid:
+
+  - 2010-04-07 lunch:
+      - 1 pizza leftovers:        500 kcal
+      - 1 soda:                   300 kcal
+
