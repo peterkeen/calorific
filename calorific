@@ -11,12 +11,20 @@ use Perl6::Form;
 BEGIN { unshift @INC, dirname(__FILE__) . "/lib"; }
 $SIG{__DIE__} = sub { use Carp; confess @_; };
 
-use Calorific::Recipe;
-use Calorific::Entry;
+use App::Calorific::Recipe;
+use App::Calorific::Entry;
+use App::Calorific::Util qw/ add_hashes /;
 
 GetOptions(
-    'f|file=s' => \(my $file)
+    'f|file=s' => \(my $file),
+    'h|help'   => \(my $print_help),
 );
+
+if ($print_help) {
+    print STDERR "usage: calorific [options] [command]\n";
+    print STDERR join("\n", map { "  $_" } ('-h --help  print this help', '-f --file  input file', '', 'valid commands: daily, detail')). "\n";
+    exit 1;
+}
 
 $file ||= $ENV{CALORIFIC_FILE};
 
@@ -24,6 +32,9 @@ unless($file) {
     print STDERR "No file given. Specify one using -f or the CALORIFIC_FILE environment variable.\n";
     exit 1;
 }
+
+my $command = shift;
+$command ||= 'daily';
 
 my $contents = read_file($file);
 
@@ -36,23 +47,45 @@ for my $thing ( @$things ) {
     my ($key) = keys %$thing;
     if (key_is_recipe($key)) {
         my ($count, $label) = split(/\s+/, $key, 2);
-        $recipes{$label} = Calorific::Recipe->parse($key, $thing->{$key});
+        $recipes{$label} = App::Calorific::Recipe->parse($key, $thing->{$key});
     } elsif (key_is_entry($key)) {
-        push @entries, Calorific::Entry->parse($key, $thing->{$key});
+        push @entries, App::Calorific::Entry->parse($key, $thing->{$key});
     } else {
         die "I have no idea what to do with '$key'";
     }
 }
 
-for my $entry ( @entries )
+if ($command eq 'detail') {
+
+    for my $entry ( @entries )
+    {
+        print_entry($entry->date(), $entry->description, $entry->value(\%recipes));
+    }
+} elsif ($command eq 'daily') {
+
+    my %days;
+    for my $entry ( @entries ) {
+        my $date = $entry->date();
+        $days{$date} = add_hashes($entry->value(\%recipes), $days{$date} || {});
+    }
+
+    for my $date ( sort keys %days ) {
+        print_entry($date, "<total>", $days{$date});
+    }
+} else {
+    print STDERR "unknown command '$command'\n";
+    exit 1;
+}
+
+sub print_entry
 {
-    my $value = $entry->value(\%recipes);
+    my ($date, $description, $value) = @_;
     my @keys = sort keys %$value;
     my $first = shift @keys;
-    print form "{<<<<<<<<<<}{<<<<<<<<<<<<<<<<<<<<}{>>>>>>>>>>}\n",
-               $entry->date(), $entry->description(), $value->{$first} . " $first";
+    print form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} {>>>>>} {<<<<<<<<<<}\n",
+               $date, $description, $value->{$first}, $first;
     for my $key (@keys) {
-        print ' ' x 30 . "{>>>>>>>>>>}\n", $value->{$key} . " $key";
+        print form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", $value->{$key}, $key;
     }
 }
 

@@ -1,7 +1,7 @@
-package Calorific::Entry;
+package App::Calorific::Entry;
 
 use Mouse;
-use Calorific::Recipe;
+use App::Calorific::Recipe;
 
 has [qw/ date description recipe /] => (is => 'rw');
 
@@ -19,16 +19,16 @@ sub parse
     for my $part ( @$parts ) {
         if (ref($part) eq 'HASH') {
             my $label = [keys %$part]->[0];
-            push @components, Calorific::Recipe->parse($label, $part->{$label});
+            push @components, App::Calorific::Recipe->parse($label, $part->{$label});
         } elsif (!ref($part) || ref($part) eq '') {
-            push @components, Calorific::Recipe->parse($part, []);
+            push @components, App::Calorific::Recipe->parse($part, []);
         }
     }
 
     return $class->new(
         date => $date,
         description => $desc,
-        recipe => Calorific::Recipe->new(
+        recipe => App::Calorific::Recipe->new(
             count      => 1,
             label      => '',
             components => \@components,
