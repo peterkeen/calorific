@@ -7,7 +7,7 @@ track by creating "recipes" and dated entries that use those
 recipes. Calorific's input format is a standard YAML file.
 
 Here's a sample Calorific input file:
-
+<pre>
   - 1 egg:                                     [  90 kcal,  8 prot ]
   - 1 slice Dave's Killer Bread (whole wheat): [ 100 kcal,  5 prot ]
   - 2 tbsp crunchy peanut butter:              [ 210 kcal,  7 prot ]
@@ -30,19 +30,22 @@ Here's a sample Calorific input file:
   - 2010-04-06 breakfast:
       - 2 slice Dave's Killer Bread (whole wheat)
       - 2 tbsp crunchy peanut butter
+</pre>
 
 And here's the default output for it:
-
+<pre>
   $ calorific -f sample.yaml
   2010-03-31 <total>                  900 kcal
                                        61 prot
   2010-04-06 <total>                  410 kcal
                                        17 prot
+</pre>
 
 Entries are really just dated recipes, so anything can go in them.
 This is perfectly valid:
 
+<pre>
   - 2010-04-07 lunch:
       - 1 pizza leftovers:        500 kcal
       - 1 soda:                   300 kcal
-
+</pre>
