@@ -22,14 +22,19 @@ GetOptions(
 
 if ($print_help) {
     print STDERR "usage: calorific [options] [command]\n";
-    print STDERR join("\n", map { "  $_" } ('-h --help  print this help', '-f --file  input file', '', 'valid commands: daily, detail')). "\n";
+    print STDERR join("\n", map { "  $_" } (
+        '-h --help  print this help',
+        '-f --file  input file',
+        '',
+        'valid commands: daily, detail')
+    ). "\n";
     exit 1;
 }
 
 $file ||= $ENV{CALORIFIC_FILE};
 
 unless($file) {
-    print STDERR "No file given. Specify one using -f or the CALORIFIC_FILE environment variable.\n";
+    print STDERR "No input file given. Specify one using -f or the CALORIFIC_FILE environment variable.\n";
     exit 1;
 }
 
@@ -56,13 +61,10 @@ for my $thing ( @$things ) {
 }
 
 if ($command eq 'detail') {
-
-    for my $entry ( @entries )
-    {
+    for my $entry ( @entries ){
         print_entry($entry->date(), $entry->description, $entry->value(\%recipes));
     }
 } elsif ($command eq 'daily') {
-
     my %days;
     for my $entry ( @entries ) {
         my $date = $entry->date();
