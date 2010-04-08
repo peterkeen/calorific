@@ -27,22 +27,7 @@ sub parallel_for_each_key
 sub add_hashes
 {
     my ($left, $right) = @_;
-    return parallel_for_each_key( sub { return $_[1] + $_[2] }, $left, $right);
-}
-
-sub avg_hashes
-{
-    my %sum;
-    my %count;
-
-    parallel_for_each_key( sub {
-        $count{$_[0]}++;
-        $sum{$_[0]} = $_[1] + $_[2];
-    }, @_ );
-
-    return parallel_for_each_key( sub {
-        return $_[1] / $_[2];
-    }, \%sum, \%count);
+    return parallel_for_each_key( sub { return ($_[1] || 0) + ($_[2] || 0) }, $left, $right);
 }
 
 1;

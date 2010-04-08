@@ -8,7 +8,7 @@ use Getopt::Long;
 BEGIN { unshift @INC, dirname(__FILE__) . "/lib"; }
 $SIG{__DIE__} = sub { use Carp; confess @_; };
 
-use App::Calorific;
+use Calorific;
 
 GetOptions(
     'f|file=s' => \(my $file),
