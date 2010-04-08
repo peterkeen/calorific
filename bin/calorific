@@ -2,11 +2,7 @@
 
 use strict;
 use warnings;
-use File::Basename qw/ dirname /;
 use Getopt::Long;
-
-BEGIN { unshift @INC, dirname(__FILE__) . "/lib"; }
-$SIG{__DIE__} = sub { use Carp; confess @_; };
 
 use Calorific;
 
