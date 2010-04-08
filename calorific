@@ -3,17 +3,12 @@
 use strict;
 use warnings;
 use File::Basename qw/ dirname /;
-use File::Slurp qw/ read_file /;
 use Getopt::Long;
-use YAML::XS;
-use Perl6::Form;
 
 BEGIN { unshift @INC, dirname(__FILE__) . "/lib"; }
 $SIG{__DIE__} = sub { use Carp; confess @_; };
 
-use App::Calorific::Recipe;
-use App::Calorific::Entry;
-use App::Calorific::Util qw/ add_hashes /;
+use App::Calorific;
 
 GetOptions(
     'f|file=s' => \(my $file),
@@ -38,69 +33,16 @@ unless($file) {
     exit 1;
 }
 
+my $calorific = App::Calorific->new(filename => $file);
+
 my $command = shift;
 $command ||= 'daily';
 
-my $contents = read_file($file);
-
-my $things = Load($contents);
-
-my %recipes;
-my @entries;
-
-for my $thing ( @$things ) {
-    my ($key) = keys %$thing;
-    if (key_is_recipe($key)) {
-        my ($count, $label) = split(/\s+/, $key, 2);
-        $recipes{$label} = App::Calorific::Recipe->parse($key, $thing->{$key});
-    } elsif (key_is_entry($key)) {
-        push @entries, App::Calorific::Entry->parse($key, $thing->{$key});
-    } else {
-        die "I have no idea what to do with '$key'";
-    }
-}
-
 if ($command eq 'detail') {
-    for my $entry ( @entries ){
-        print_entry($entry->date(), $entry->description, $entry->value(\%recipes));
-    }
+    print $calorific->detail_report();
 } elsif ($command eq 'daily') {
-    my %days;
-    for my $entry ( @entries ) {
-        my $date = $entry->date();
-        $days{$date} = add_hashes($entry->value(\%recipes), $days{$date} || {});
-    }
-
-    for my $date ( sort keys %days ) {
-        print_entry($date, "<total>", $days{$date});
-    }
+    print $calorific->daily_report();
 } else {
     print STDERR "unknown command '$command'\n";
     exit 1;
 }
-
-sub print_entry
-{
-    my ($date, $description, $value) = @_;
-    my @keys = sort keys %$value;
-    my $first = shift @keys;
-    print form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} {>>>>>} {<<<<<<<<<<}\n",
-               $date, $description, $value->{$first}, $first;
-    for my $key (@keys) {
-        print form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", $value->{$key}, $key;
-    }
-}
-
-sub key_is_recipe
-{
-    my $key = shift;
-    return $key =~ /^[\d\.]+\s+/;
-}
-
-sub key_is_entry
-{
-    my $key = shift;
-    return $key =~ /^\d{4}-\d{2}-\d{2}\s+/;
-}
-
-

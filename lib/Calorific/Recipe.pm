@@ -1,9 +1,9 @@
-package App::Calorific::Recipe;
+package Calorific::Recipe;
 
-use Mouse;
-use App::Calorific::Util qw/ add_hashes /;
+use Moose;
+use Calorific::Util qw/ add_hashes /;
 
-has [qw/ count label components /] => (is => 'rw');
+has [qw/ count label components /] => (is => 'ro');
 
 sub parse
 {
@@ -59,5 +59,7 @@ sub value
         return $value_by_label;
     }
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

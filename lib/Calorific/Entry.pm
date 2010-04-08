@@ -1,9 +1,9 @@
-package App::Calorific::Entry;
+package Calorific::Entry;
 
-use Mouse;
-use App::Calorific::Recipe;
+use Moose;
+use Calorific::Recipe;
 
-has [qw/ date description recipe /] => (is => 'rw');
+has [qw/ date description recipe /] => (is => 'ro');
 
 sub parse
 {
@@ -19,16 +19,16 @@ sub parse
     for my $part ( @$parts ) {
         if (ref($part) eq 'HASH') {
             my $label = [keys %$part]->[0];
-            push @components, App::Calorific::Recipe->parse($label, $part->{$label});
+            push @components, Calorific::Recipe->parse($label, $part->{$label});
         } elsif (!ref($part) || ref($part) eq '') {
-            push @components, App::Calorific::Recipe->parse($part, []);
+            push @components, Calorific::Recipe->parse($part, []);
         }
     }
 
     return $class->new(
         date => $date,
         description => $desc,
-        recipe => App::Calorific::Recipe->new(
+        recipe => Calorific::Recipe->new(
             count      => 1,
             label      => '',
             components => \@components,
@@ -41,5 +41,7 @@ sub value
     my ($self, $recipe_xref) = @_;
     return $self->recipe()->value(1, $recipe_xref);
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

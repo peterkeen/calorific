@@ -1,4 +1,4 @@
-package App::Calorific::Util;
+package Calorific::Util;
 
 use strict;
 use base 'Exporter';
