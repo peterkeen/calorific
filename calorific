@@ -33,7 +33,7 @@ unless($file) {
     exit 1;
 }
 
-my $calorific = App::Calorific->new(filename => $file);
+my $calorific = Calorific->new(filename => $file);
 
 my $command = shift;
 $command ||= 'daily';
