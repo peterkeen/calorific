@@ -49,3 +49,18 @@ This is perfectly valid:
       - 1 pizza leftovers:        500 kcal
       - 1 soda:                   300 kcal
 </pre>
+
+### Installation ###
+
+Calorific isn't quite ready for the CPAN yet, so installation is 
+only recommended for the brave. First, clone this project. Then, install
+Dist::Zilla from CPAN. Finally (here's the brave part), run
+
+<pre>
+sudo dzil install
+</pre>
+
+from the root of your clone and wait for the dependencies to build.
+We depend on Moose and YAML::XS, among other things, so if you
+don't ahve this stuff already this could take awhile. Eventually you'll
+end up with a 'calorific' program in your bin directory.
