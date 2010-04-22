@@ -109,9 +109,9 @@ sub _format_entry
     my @keys = sort keys %$value;
     my $first = shift @keys;
     $string .= form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} {>>>>>} {<<<<<<<<<<}\n",
-               $date, $description, $value->{$first}, $first;
+               $date, $description, int($value->{$first}), $first;
     for my $key (@keys) {
-        $string .= form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", $value->{$key}, $key;
+        $string .= form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", int($value->{$key}), $key;
     }
     return $string;
 }
