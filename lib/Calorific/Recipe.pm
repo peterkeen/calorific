@@ -1,6 +1,6 @@
 package Calorific::Recipe;
 
-use Moose;
+use Mouse;
 use Calorific::Util qw/ add_hashes /;
 
 has [qw/ count label components /] => (is => 'ro');

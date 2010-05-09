@@ -1,6 +1,6 @@
 package Calorific::Entry;
 
-use Moose;
+use Mouse;
 use Calorific::Recipe;
 
 has [qw/ date description recipe /] => (is => 'ro');

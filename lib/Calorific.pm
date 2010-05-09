@@ -1,6 +1,6 @@
 package Calorific;
 
-use Moose;
+use Mouse;
 use File::Slurp qw/ read_file /;
 use YAML::XS;
 use Perl6::Form;
