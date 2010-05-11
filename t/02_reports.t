@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Calorific;
 use File::Temp qw/ tempfile /;
 
@@ -82,6 +82,11 @@ is (Calorific->new(filename => $file3)->daily_report(), <<HERE, "rounds numbers 
                                      44 protein
 2010-01-02 <total>                   90 kcal
                                      10 protein
+HERE
+
+is (Calorific->new(filename => $file3)->weekly_report(), <<HERE, "weekly averages");
+2009-12-28 <total>                  290 kcal
+                                     27 protein
 HERE
 
 
