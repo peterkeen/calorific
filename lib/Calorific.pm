@@ -7,7 +7,7 @@ use Perl6::Form;
 
 use Calorific::Recipe;
 use Calorific::Entry;
-use Calorific::Util qw/ add_hashes /;
+use Calorific::Util qw/ add_hashes parse_date /;
 
 has 'filename' => (
     is       => 'ro',
@@ -33,11 +33,11 @@ has 'entries' => (
     lazy    => 1,
     default => sub { [] },
     handles => {
-        add_entries    => 'push',
-        filter_entries => 'grep',
-        num_entries    => 'count',
-        all_entries    => 'elements',
-        sorted_entries => 'sort',
+        add_entries      => 'push',
+        filtered_entries => 'grep',
+        num_entries      => 'count',
+        all_entries      => 'elements',
+        sorted_entries   => 'sort',
     },
 );
 
@@ -77,7 +77,7 @@ sub detail_report
         map {
             $self->_format_entry($_->date(), $_->description, $_->value($self->recipes()))
         }
-        $self->all_entries()
+        $self->entries_in_date_range()
     );
 }
 
@@ -90,16 +90,56 @@ sub daily_report
         map {
             $self->_format_entry($_, '<total>', $aggregates->{$_});
         }
-        sort keys %$aggregates
-    );
+        sort keys %$aggregates);
+}
+
+sub weekly_report
+{
+    my $self = shift;
+    my $aggregates = $self->_daily_aggregates();
+
+    my %count_by_week;
+    my %sum_by_week;
+
+    for my $d (keys %$aggregates) {
+        my $date = parse_date($d);
+        my $week = $date->subtract( days => $date->day_of_week - 1 );
+        $count_by_week{$week}++;
+        $sum_by_week{$week} = add_hashes($aggregates->{$d}, $sum_by_week{$week} || {});
+    }
+
+    my %avg_by_week;
+    for my $week ( keys %sum_by_week ) {
+        for my $key ( keys %{ $sum_by_week{$week} }) {
+            $avg_by_week{$week}{$key} = $sum_by_week{$week}{$key} / $count_by_week{$week};
+        }
+    }
+
+    return join(
+        '',
+        map {
+            $self->_format_entry($_, '<total>', $avg_by_week{$_});
+        }
+        sort keys %avg_by_week);
+}
+
+sub entries_in_date_range
+{
+    my $self = shift;
+
+    return $self->filtered_entries(sub {
+        return 0 if $self->begin_date() && $_->date() < $self->begin_date();
+        return 0 if $self->end_date()   && $_->date() > $self->end_date();
+        return 1;
+    });
 }
 
 sub _daily_aggregates
 {
     my $self = shift;
     my %days;
-    for my $entry ( $self->all_entries() ) {
-        my $date = $entry->date();
+    for my $entry ( $self->entries_in_date_range() ) {
+        my $date = $entry->date()->strftime('%F');
         $days{$date} = add_hashes($entry->value($self->recipes()), $days{$date} || {});
     }
     return \%days;
@@ -107,13 +147,13 @@ sub _daily_aggregates
 
 sub _format_entry
 {
-    my ($self, $date, $description, $value) = @_;
+    my ($self, $datetime, $description, $value) = @_;
+    my ($date) = split(/T/, $datetime);
     my $string = '';
     my @keys = sort keys %$value;
     my $first = shift @keys;
-    warn $date;
     $string .= form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} {>>>>>} {<<<<<<<<<<}\n",
-               $date->strftime('%F'), $description, int($value->{$first}), $first;
+               $date, $description, int($value->{$first}), $first;
     for my $key (@keys) {
         $string .= form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", int($value->{$key}), $key;
     }

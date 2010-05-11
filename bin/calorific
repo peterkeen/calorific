@@ -10,8 +10,8 @@ use Calorific::Util qw/ parse_date /;
 GetOptions(
     'f|file=s'  => \(my $file),
     'h|help'    => \(my $print_help),
-    'b|begin'   => \(my $begin),
-    'e|end'     => \(my $end),
+    'b|begin=s' => \(my $begin),
+    'e|end=s'   => \(my $end),
 );
 
 if ($print_help) {
@@ -22,7 +22,7 @@ if ($print_help) {
         '-b --begin    beginning of date range',
         '-e --end      end of date range',
         '',
-        'valid commands: daily, detail')
+        'valid commands: daily, detail, weekly')
     ). "\n";
     exit 1;
 }
@@ -47,6 +47,8 @@ if ($command eq 'detail') {
     print $calorific->detail_report();
 } elsif ($command eq 'daily') {
     print $calorific->daily_report();
+} elsif ($command eq 'weekly') {
+    print $calorific->weekly_report();
 } else {
     print STDERR "unknown command '$command'\n";
     exit 1;
