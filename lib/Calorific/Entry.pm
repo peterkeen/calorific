@@ -2,6 +2,7 @@ package Calorific::Entry;
 
 use Mouse;
 use Calorific::Recipe;
+use Calorific::Util qw/ parse_date /;
 
 has [qw/ date description recipe /] => (is => 'ro');
 
@@ -9,6 +10,7 @@ sub parse
 {
     my ($class, $key, $parts) = @_;
     my ($date, $desc) = split(/\s+/, $key, 2);
+    $date = parse_date($date);
 
     my @components;
 

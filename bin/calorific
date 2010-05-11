@@ -5,17 +5,22 @@ use warnings;
 use Getopt::Long;
 
 use Calorific;
+use Calorific::Util qw/ parse_date /;
 
 GetOptions(
-    'f|file=s' => \(my $file),
-    'h|help'   => \(my $print_help),
+    'f|file=s'  => \(my $file),
+    'h|help'    => \(my $print_help),
+    'b|begin'   => \(my $begin),
+    'e|end'     => \(my $end),
 );
 
 if ($print_help) {
     print STDERR "usage: calorific [options] [command]\n";
     print STDERR join("\n", map { "  $_" } (
-        '-h --help  print this help',
-        '-f --file  input file',
+        '-h --help     print this help',
+        '-f --file     input file',
+        '-b --begin    beginning of date range',
+        '-e --end      end of date range',
         '',
         'valid commands: daily, detail')
     ). "\n";
@@ -29,7 +34,11 @@ unless($file) {
     exit 1;
 }
 
-my $calorific = Calorific->new(filename => $file);
+my $calorific = Calorific->new(
+    filename   => $file,
+    begin_date => parse_date($begin),
+    end_date   => parse_date($end),
+);
 
 my $command = shift;
 $command ||= 'daily';

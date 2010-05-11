@@ -41,6 +41,9 @@ has 'entries' => (
     },
 );
 
+has 'begin_date' => (is => 'ro');
+has 'end_date'   => (is => 'ro');
+
 sub BUILD
 {
     my $self = shift;
@@ -108,8 +111,9 @@ sub _format_entry
     my $string = '';
     my @keys = sort keys %$value;
     my $first = shift @keys;
+    warn $date;
     $string .= form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} {>>>>>} {<<<<<<<<<<}\n",
-               $date, $description, int($value->{$first}), $first;
+               $date->strftime('%F'), $description, int($value->{$first}), $first;
     for my $key (@keys) {
         $string .= form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", int($value->{$key}), $key;
     }
