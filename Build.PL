@@ -5,6 +5,7 @@ Module::Build->new(
     license => 'perl',
     dist_author => 'Pete Keen <pete@bugsplat.info>',
     license => 'perl',
+    dist_abstract => 'A command-line application for tracking nutrients',
     requires => {
         'DateTime::Format::Natural' => '0.85',
         'File::Slurp'               => '9999.13',

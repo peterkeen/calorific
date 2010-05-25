@@ -53,11 +53,13 @@ This is perfectly valid:
 ### Installation ###
 
 Calorific isn't quite ready for the CPAN yet, so installation is 
-only recommended for the brave. First, clone this project. Then, install
-Dist::Zilla from CPAN. Finally (here's the brave part), run
+only recommended for the brave. First, clone this project. Then, run
+these commands:
 
 <pre>
-sudo dzil install
+perl ./Build.PL
+./Build
+sudo ./Build install
 </pre>
 
 from the root of your clone and wait for the dependencies to build.
