@@ -1,5 +1,7 @@
 package Calorific;
 
+our $VERSION = '0.01';
+
 use Mouse;
 use File::Slurp qw/ read_file /;
 use YAML::XS;
