@@ -23,11 +23,11 @@ my $file1 = write_to_tmpfile(<<HERE);
 HERE
 
 is (Calorific->new(filename => $file1)->daily_report(), <<HERE, "daily report");
-2010-01-01 <total>                  190 kcal
+2010-01-01 <total>                          190 kcal
 HERE
 
 is (Calorific->new(filename => $file1)->detail_report(), <<HERE, "simple detail report");
-2010-01-01 breakfast                190 kcal
+2010-01-01 breakfast               190 kcal
 HERE
 
 
@@ -47,19 +47,19 @@ my $file2 = write_to_tmpfile(<<HERE);
 HERE
 
 is (Calorific->new(filename => $file2)->daily_report(), <<HERE, "complex daily report");
-2010-01-01 <total>                  490 kcal
-                                     42 protein
-2010-01-02 <total>                   90 kcal
-                                     10 protein
+2010-01-01 <total>                          490 kcal
+                                             42 protein
+2010-01-02 <total>                           90 kcal
+                                             10 protein
 HERE
 
 is (Calorific->new(filename => $file2)->detail_report(), <<HERE, "complex detail report");
-2010-01-01 breakfast                190 kcal
-                                     18 protein
-2010-01-01 lunch                    300 kcal
-                                     24 protein
-2010-01-02 breakfast                 90 kcal
-                                     10 protein
+2010-01-01 breakfast               190 kcal
+                                    18 protein
+2010-01-01 lunch                   300 kcal
+                                    24 protein
+2010-01-02 breakfast                90 kcal
+                                    10 protein
 HERE
 
 my $file3 = write_to_tmpfile(<<HERE);
@@ -78,15 +78,15 @@ my $file3 = write_to_tmpfile(<<HERE);
 HERE
 
 is (Calorific->new(filename => $file3)->daily_report(), <<HERE, "rounds numbers in report");
-2010-01-01 <total>                  490 kcal
-                                     44 protein
-2010-01-02 <total>                   90 kcal
-                                     10 protein
+2010-01-01 <total>                          490 kcal
+                                             44 protein
+2010-01-02 <total>                           90 kcal
+                                             10 protein
 HERE
 
 is (Calorific->new(filename => $file3)->weekly_report(), <<HERE, "weekly averages");
-2009-12-28 <total>                  290 kcal
-                                     27 protein
+2009-12-28 <total>                          290 kcal
+                                             27 protein
 HERE
 
 

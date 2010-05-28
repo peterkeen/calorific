@@ -6,6 +6,7 @@ use Mouse;
 use File::Slurp qw/ read_file /;
 use YAML::XS;
 use Perl6::Form;
+use Term::ANSIColor;
 
 use Calorific::Recipe;
 use Calorific::Entry;
@@ -25,6 +26,18 @@ has 'recipes'  => (
     handles => {
         get_recipe => 'get',
         set_recipe => 'set',
+    },
+);
+
+has 'goals' => (
+    is      => 'ro',
+    traits  => [ 'Hash' ],
+    isa     => 'HashRef',
+    lazy    => 1,
+    default => sub { {} },
+    handles => {
+        get_goal => 'get',
+        set_goal => 'set',
     },
 );
 
@@ -50,21 +63,26 @@ sub BUILD
 {
     my $self = shift;
     my $contents = read_file($self->filename());
-    my $recipes_and_entries = Load($contents);
+    my $things = Load($contents);
 
-    for my $recipe_or_entry ( @$recipes_and_entries ) {
-        my ($key) = keys %$recipe_or_entry;
+    for my $thing ( @$things ) {
+        my ($key) = keys %$thing;
         if (_key_is_recipe($key)) {
             my ($count, $label) = split(/\s+/, $key, 2);
             $self->set_recipe($label, Calorific::Recipe->parse(
                 $key,
-                $recipe_or_entry->{$key}
+                $thing->{$key}
             ));
         } elsif (_key_is_entry($key)) {
             $self->add_entries(Calorific::Entry->parse(
                 $key,
-                $recipe_or_entry->{$key}
+                $thing->{$key}
             ));
+        } elsif (_key_is_goals($key)) {
+            for my $goal ( @{ $thing->{$key} }) {
+                my ($nutrient) = keys %$goal;
+                $self->set_goal($nutrient, $goal->{$nutrient});
+            }
         } else {
             die "invalid recipe or entry key '$key'";
         }
@@ -77,7 +95,7 @@ sub detail_report
     return join(
         '',
         map {
-            $self->_format_entry($_->date(), $_->description, $_->value($self->recipes()))
+            $self->_format_entry($_->date(), $_->description, $_->value($self->recipes()), 1)
         }
         $self->entries_in_date_range()
     );
@@ -149,17 +167,43 @@ sub _daily_aggregates
 
 sub _format_entry
 {
-    my ($self, $datetime, $description, $value) = @_;
+    my ($self, $datetime, $description, $value, $no_color) = @_;
     my ($date) = split(/T/, $datetime);
     my $string = '';
     my @keys = sort keys %$value;
     my $first = shift @keys;
-    $string .= form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} {>>>>>} {<<<<<<<<<<}\n",
-               $date, $description, int($value->{$first}), $first;
+    my $val_format = $no_color ? '{>>>>}' : '{>>>>>>>>>>>>>}';
+    $string .= form "{<<<<<<<<} {<<<<<<<<<<<<<<<<<<} ${val_format} {<<<<<<<<<<}\n",
+               $date, $description, $self->_format_value($value->{$first}, $first, $no_color), $first;
     for my $key (@keys) {
-        $string .= form ' ' x 32 . "{>>>>>} {<<<<<<<<<<}\n", int($value->{$key}), $key;
+        $string .= form ' ' x 32 . "${val_format} {<<<<<<<<<<}\n", $self->_format_value($value->{$key}, $key, $no_color), $key;
     }
     return $string;
+}
+
+sub _format_value
+{
+    my ($self, $value, $nutrient, $no_color) = @_;
+
+    my ($min, $max);
+    my $goal = $self->get_goal($nutrient);
+    if (!$goal || $no_color) {
+        return int($value)
+    }
+
+    if (ref($goal) eq 'ARRAY') {
+        ($min, $max) = @$goal;
+    } else {
+        $min = 0;
+        $max = $goal;
+    }
+
+    my $color = $value >= $min && $value <= $max
+        ? "green"
+        : "red"
+    ;
+
+    return colored(int($value), $color);
 }
 
 sub _key_is_recipe
@@ -172,6 +216,12 @@ sub _key_is_entry
 {
     my $key = shift;
     return $key =~ /^\d{4}-\d{2}-\d{2}\s+/;
+}
+
+sub _key_is_goals
+{
+    my $key = shift;
+    return $key =~ /^goals$/i;
 }
 
 __PACKAGE__->meta->make_immutable;
